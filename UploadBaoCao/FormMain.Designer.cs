@@ -526,6 +526,7 @@
             this.cmb_NgayTao.Properties.MaskSettings.Set("mask", "M/d/yyyy");
             this.cmb_NgayTao.Size = new System.Drawing.Size(133, 20);
             this.cmb_NgayTao.TabIndex = 1;
+            this.cmb_NgayTao.EditValueChanged += new System.EventHandler(this.cmb_NgayTao_EditValueChanged);
             // 
             // cmb_LoaiBaoCao
             // 

@@ -29,6 +29,84 @@ namespace UploadBaoCao
             txt_User.Text = Bien.ftpUser;
             txt_Pass.Text = Bien.ftpPassword;
         }
+        private void getDataByNameFile()
+        {
+            int nam = cmb_NgayTao.DateTimeOffset.Year;
+            int thang = cmb_NgayTao.DateTimeOffset.Month;
+            int ngay = cmb_NgayTao.DateTimeOffset.Day;
+            string date = nam.ToString() + thang.ToString() + ngay.ToString();
+            string foldersave = "";
+            string filename = "";
+            if (cmb_LoaiBaoCao.SelectedIndex==0)
+            {
+                filename= Bien.MaDonVi + "_revenue_daily_kqi_" + date + ".txt";
+                foldersave = Bien.pathProject + "\\" + nam + "\\" + thang + "\\" + ngay +"\\" + filename;
+            }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 1)
+            {
+                filename = Bien.MaDonVi + "_revenue_monthly_kqi_" + date + ".txt";
+                foldersave = Bien.pathProject + "\\" + nam + "\\" + thang + "\\" + filename;
+            }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 2)
+            {
+                filename = Bien.MaDonVi + "_revenue_monthly_kh_kqi_" + date + ".txt";
+                foldersave = Bien.pathProject + "\\" + nam + "\\" + thang + "\\" + filename;
+            }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 3)
+            {
+                filename = Bien.MaDonVi + "_quarterly_kh_kqi_" + date + ".txt";
+                foldersave = Bien.pathProject + "\\" + nam + "\\" + thang + "\\" + filename;
+            }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 4)
+            {
+                filename = Bien.MaDonVi + "_revenue_yearly_kh_kqi_" + date + ".txt";
+                foldersave = Bien.pathProject + "\\" + nam + "\\" + filename;
+            }
+
+            if(File.Exists(foldersave))
+            {
+                string[] noidung = File.ReadAllLines(foldersave);
+                if (noidung.Count() > 0)
+                {
+                    CellRange usedrange = Bien.worksheet.GetUsedRange();
+                    int rowcount = usedrange.RowCount;
+                    int dongbatdau = 3;
+                    int ind_Ma = 0;
+                    int ind_Value = 5;
+                    int ind_Value_Month = 6;
+                    for (int i = 0; i < rowcount;i++)
+                    {
+                        string ma_ex = Bien.worksheet.Cells[dongbatdau + i, ind_Ma].Value.ToString();
+                        foreach (string str in noidung)
+                        {
+
+                            string[] lst = str.Split('|');
+                            if (filename.Contains("daily"))
+                            {
+                                string ma = lst[0];
+                                string value = lst[1];
+                                string value_month = lst[2];
+                                if (ma == ma_ex)
+                                {
+                                    Bien.worksheet.Cells[dongbatdau + i, ind_Value].Value = value;
+                                    Bien.worksheet.Cells[dongbatdau + i, ind_Value_Month].Value = value_month;
+                                }
+                            }
+                            else
+                            {
+                                string ma = lst[0];
+                                string value = lst[1];
+                                if (ma == ma_ex)
+                                {
+                                    Bien.worksheet.Cells[dongbatdau + i, ind_Value].Value = value;
+                                }
+                            }
+                        }
+                    }
+                   
+                }
+            }
+        }
         private void loadSetting()
         {
             DataSet set = new DataSet();
@@ -41,8 +119,6 @@ namespace UploadBaoCao
             Bien.ftpUser = tb.Rows[0]["SFPTUSER"].ToString();
             Bien.ftpPassword = tb.Rows[0]["SFTPPASS"].ToString();
             Bien.MaDonVi = tb.Rows[0]["MADONVI"].ToString();
-
-
         }
         public DataTable CreateTable(string tableName,  string[] colName)
         {
@@ -83,6 +159,10 @@ namespace UploadBaoCao
         private void btn_KetNoi_Click(object sender, EventArgs e)
         {
             pn_FTP.Visible = false;
+            Bien.ftpHost = txt_Host.Text;
+            Bien.ftpPassword = txt_Pass.Text;
+            Bien.ftpPost = txt_Post.Text;
+            Bien.ftpUser = txt_User.Text;
         }
 
         private void barButtonItem2_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -112,6 +192,19 @@ namespace UploadBaoCao
                 Bien.worksheet = spreadsheetControl1.Document.Worksheets[0];
 
             }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 3)
+            {
+                Bien.workbook.LoadDocument(Bien.pathTemplate_Quy);
+                Bien.worksheet = spreadsheetControl1.Document.Worksheets[0];
+
+            }
+            else if (cmb_LoaiBaoCao.SelectedIndex == 4)
+            {
+                Bien.workbook.LoadDocument(Bien.pathTemplate_Nam);
+                Bien.worksheet = spreadsheetControl1.Document.Worksheets[0];
+
+            }
+            getDataByNameFile();
         }
 
         private void btn_ChuyenDoi_Click(object sender, EventArgs e)
@@ -425,6 +518,11 @@ namespace UploadBaoCao
         {
             Form_SelectedFolder frm = new Form_SelectedFolder();
             frm.ShowDialog();
+        }
+
+        private void cmb_NgayTao_EditValueChanged(object sender, EventArgs e)
+        {
+            getDataByNameFile();
         }
     }
 }
